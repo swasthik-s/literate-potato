@@ -1,20 +1,36 @@
 import Link from "next/link";
 
 type Movie = {
-  movieKey: string; title: string; originalTitle?: string | null;
-  overview?: string | null; posterPath?: string | null; releaseDate?: string | null;
-  releaseCountry?: string | null; originalLanguage?: string | null;
+  movieKey: string;
+  title: string;
+  originalTitle?: string | null;
+  overview?: string | null;
+  posterPath?: string | null;
+  releaseDate?: string | null;
+  releaseCountry?: string | null;
+  originalLanguage?: string | null;
 };
 
 async function getMovies(): Promise<Movie[]> {
   const uri = process.env.MONGODB_URI;
   if (!uri) return [];
+
   try {
     const { getDb } = await import("@/lib/mongodb");
     const db = await getDb();
-    return await db.collection("movies").find({}, {
-      projection: { _id: 0, movieKey: 1, title: 1, originalTitle: 1, overview: 1, posterPath: 1, releaseDate: 1, releaseCountry: 1, originalLanguage: 1 }
-    }).sort({ releaseDate: 1 }).limit(18).toArray() as Movie[];
+    return await db.collection<Movie>("movies").find({}, {
+      projection: {
+        _id: 0,
+        movieKey: 1,
+        title: 1,
+        originalTitle: 1,
+        overview: 1,
+        posterPath: 1,
+        releaseDate: 1,
+        releaseCountry: 1,
+        originalLanguage: 1
+      }
+    }).sort({ releaseDate: 1 }).limit(18).toArray();
   } catch {
     return [];
   }
