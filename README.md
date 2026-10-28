@@ -1,41 +1,51 @@
-# Global Movie & OTT Tracker — Scraper
+# ReelRadar — Global Movie & OTT Tracker
 
-Python ingestion worker for a multilingual worldwide movie and OTT release tracker, using MongoDB Atlas.
+Next.js + TypeScript on Vercel, with MongoDB Atlas. No Python or Streamlit runtime.
 
-## Included
-- TMDB upcoming-movie API adapter, configured for US, India and UK.
-- RSS/Atom, JSON API and permitted public HTML adapters, configurable in `source_registry.json`.
-- Unicode-aware title normalization for multilingual scripts.
-- Idempotent MongoDB upserts, source evidence and change-event history.
-- Source-specific polling intervals, exponential retry backoff and per-source health records.
-- Dockerfile and unit tests.
+## Included in this starter
+- Next.js App Router homepage and movie listing.
+- MongoDB Atlas connection and indexes.
+- Protected `GET /api/cron/ingest` route for scheduled ingestion.
+- TMDB upcoming API adapter for multiple regions.
+- RSS/Atom and permitted HTML adapters that can be configured in code.
+- Unicode-aware title normalization, idempotent upserts, source evidence and change-event history.
+- `GET /api/movies?q=...` JSON endpoint.
+- Vercel Cron configuration.
 
-## Quick start
-1. Copy `.env.example` to `.env`.
-2. Set `MONGODB_URI` and `TMDB_READ_ACCESS_TOKEN`.
-3. Install dependencies: `pip install -r requirements.txt`.
-4. Run tests: `pytest -q`.
-5. Run a single pass: `python -m movie_scraper.worker --once`.
-6. Run continuous polling: `python -m movie_scraper.worker`.
+## Local development
+1. Install Node.js 20 or newer.
+2. Run `npm install`.
+3. Copy `.env.example` to `.env.local` and fill in secrets.
+4. Run `npm run dev`.
+5. Run `npm run typecheck` and `npm run build`.
 
-## Data-source setup
-Edit `source_registry.json`. RSS, JSON and HTML examples are disabled until replaced with sources you are authorized to access. Configure each source's actual schema and CSS selectors. Avoid scraping login-gated or access-controlled content. Follow applicable terms, robots directives, rate limits, copyright restrictions and attribution requirements.
+## Environment variables
+- `MONGODB_URI`: MongoDB Atlas connection string.
+- `MONGODB_DATABASE`: database name (defaults to `movie_tracker`).
+- `TMDB_READ_ACCESS_TOKEN`: TMDB API read token.
+- `CRON_SECRET`: long random secret used to protect the ingestion route.
+- `MOVIE_REGIONS`: documented for region configuration; edit `src/lib/sources/registry.ts` to change sources.
 
-TMDB needs a Read Access Token from its developer settings. API coverage is not exhaustive; OTT availability and direct watch links require a separately licensed provider or official source adapters. This worker does not claim complete worldwide coverage.
+## Vercel deployment
+1. Import this GitHub repository into Vercel.
+2. Add the environment variables above in Project Settings.
+3. Deploy. Vercel Cron calls `/api/cron/ingest` using the configured cron authorization mechanism where supported; the route also checks `Authorization: Bearer $CRON_SECRET`.
+4. Verify the first run in Vercel function logs and MongoDB Atlas.
 
-## Data quality
-- TMDB dates are stored as reported source data, not automatically labeled as officially confirmed.
-- Non-API sources are stored with source URL and observation time.
-- Conflicting dates need source-specific policies and, for high-impact changes, a review queue before public display.
-- Multilingual normalization is conservative; similar names can still be distinct films. External IDs are preferred when available.
+The repository currently configures a 15-minute Cron schedule. Availability of frequent schedules depends on the Vercel plan. If the plan does not permit this schedule, change `vercel.json` to an allowed interval or use an external scheduler that calls the protected endpoint.
 
-## MongoDB collections
-- `movies`: normalized movie records and source evidence.
-- `changeEvents`: discoveries and observed field changes.
-- `sourceRuns`: last status and health of each source.
+## Data integrity notes
+- TMDB's upcoming endpoint is regional discovery, not a complete worldwide release feed.
+- TMDB dates are stored as reported data; they are not automatically called officially confirmed.
+- RSS and HTML adapters are generic examples and must be configured for each source's real structure. They are not enabled by default.
+- OTT availability and direct watch URLs are not yet integrated; use a licensed provider or authorized official source.
+- This starter uses TMDB IDs for authoritative movie identity. Items without IDs need stronger entity resolution and human review before they are merged into canonical movie records.
+- Respect source terms, applicable robots directives, rate limits, copyright, attribution and licensing.
 
-## Deployment
-Run as a long-lived container/worker (Dockerfile included). Keep the Next.js frontend on Vercel. Vercel Cron can invoke bounded jobs, but a continuously polling worker should run on a worker/container service. Store secrets only in environment variables; never commit `.env`.
+## Collections
+- `movies`: canonical title and release records.
+- `changeEvents`: discovery and field-change audit log.
+- `sourceRuns`: last run status, timestamps and errors.
 
-## Important limitations
-This is a foundation, not a finished global data product. Production hardening should add per-provider schemas, regional OTT availability integration, stronger entity resolution using original-language titles and release years, a review queue, source health alerts, link validation, retention controls, and integration tests against a staging MongoDB database.
+## Next production tasks
+Add a licensed OTT availability provider, provider deep links by country, robust article-to-title matching, review queue for conflicting date claims, integration tests, alerting and pagination/search indexes for scale.

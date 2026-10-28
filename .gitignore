@@ -1,6 +1,8 @@
+node_modules/
+.next/
+.vercel/
 .env
-.venv/
-__pycache__/
-.pytest_cache/
-*.py[cod]
+.env.local
+.env.*.local
+coverage/
 .DS_Store
