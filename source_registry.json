@@ -1,0 +1,59 @@
+{
+  "sources": [
+    {
+      "id": "tmdb-upcoming-us",
+      "type": "tmdb_upcoming",
+      "enabled": true,
+      "interval_seconds": 900,
+      "region": "US",
+      "language": "en-US",
+      "priority": 70
+    },
+    {
+      "id": "tmdb-upcoming-in",
+      "type": "tmdb_upcoming",
+      "enabled": true,
+      "interval_seconds": 1800,
+      "region": "IN",
+      "language": "en-US",
+      "priority": 70
+    },
+    {
+      "id": "tmdb-upcoming-gb",
+      "type": "tmdb_upcoming",
+      "enabled": true,
+      "interval_seconds": 1800,
+      "region": "GB",
+      "language": "en-GB",
+      "priority": 70
+    },
+    {
+      "id": "example-rss",
+      "type": "rss",
+      "enabled": false,
+      "interval_seconds": 900,
+      "url": "https://replace-with-an-authorized-feed.example/rss.xml",
+      "priority": 30
+    },
+    {
+      "id": "example-json-api",
+      "type": "json_api",
+      "enabled": false,
+      "interval_seconds": 1800,
+      "url": "https://replace-with-an-authorized-api.example/releases",
+      "items_path": "results",
+      "priority": 40
+    },
+    {
+      "id": "example-public-html",
+      "type": "html",
+      "enabled": false,
+      "interval_seconds": 3600,
+      "url": "https://replace-with-an-authorized-public-page.example/releases",
+      "item_selector": "article.release",
+      "title_selector": "h2",
+      "date_selector": "time",
+      "priority": 20
+    }
+  ]
+}
